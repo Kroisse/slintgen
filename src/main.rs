@@ -113,7 +113,7 @@ fn process_component(
         if let Some(return_type) = callback.return_type {
             println!(" => {};", map_type(return_type, seen_types));
         } else {
-            println!(";");
+            println!(" => void;")
         }
     }
     // add a run function

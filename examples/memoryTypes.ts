@@ -7,6 +7,6 @@ export interface TileData {
 export interface MainWindow {
   disable_tiles: boolean;
   memory_tiles: TileData[];
-  check_if_pair_solved: ();
+  check_if_pair_solved: () => void;
   run: () => Promise<void>;
 }
