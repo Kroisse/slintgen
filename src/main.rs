@@ -68,7 +68,11 @@ fn process_struct(cursor: &mut TreeCursor, source_bytes: &[u8], seen_types: &mut
     // Generate TypeScript interface
     println!("export interface {} {{", struct_name);
     for (name, field_type) in fields {
-        println!("  {}: {};", name, map_type(field_type, seen_types));
+        println!(
+            "  {}: {};",
+            map_name(name),
+            map_type(field_type, seen_types)
+        );
     }
     println!("}}");
 }
@@ -91,9 +95,9 @@ fn process_component(
         println!("  {}: {};", map_name(name), map_type(prop_type, seen_types));
     }
     for callback in callbacks {
-        println!(
-            "  {}: ({}) => {};",
-            callback.name,
+        print!(
+            "  {}: ({})",
+            map_name(callback.name),
             callback
                 .args
                 .iter()
@@ -105,8 +109,12 @@ fn process_component(
                 ))
                 .collect::<Vec<String>>()
                 .join(", "),
-            map_type(callback.return_type, seen_types)
         );
+        if let Some(return_type) = callback.return_type {
+            println!(" => {};", map_type(return_type, seen_types));
+        } else {
+            println!(";");
+        }
     }
     // add a run function
     println!("  run: () => Promise<void>;");
@@ -141,9 +149,7 @@ fn extract_component_properties(
                                 let callback_return = prop_cursor
                                     .node()
                                     .child_by_field_name("return_type")
-                                    .unwrap()
-                                    .utf8_text(source_bytes)
-                                    .unwrap();
+                                    .map(|x| x.utf8_text(source_bytes).unwrap().to_string());
                                 // NOTE: keep this last since it modifies the cursor
                                 // NOTE: Maybe it should not modify the cursor?
                                 let callback_args = prop_cursor
@@ -155,7 +161,7 @@ fn extract_component_properties(
                                 callbacks.push(Callback {
                                     name: callback_name,
                                     args: callback_args,
-                                    return_type: callback_return.to_string(),
+                                    return_type: callback_return,
                                 });
                             }
                             if prop_cursor.node().kind() == "property" {
@@ -285,5 +291,5 @@ fn map_name(slint_name: String) -> String {
 struct Callback {
     name: String,
     args: Vec<String>,
-    return_type: String,
+    return_type: Option<String>,
 }
