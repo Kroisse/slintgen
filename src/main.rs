@@ -90,6 +90,8 @@ fn process_component(
     for (name, prop_type) in properties {
         println!("  {}: {};", map_name(name), map_type(prop_type, seen_types));
     }
+    // add a run function
+    println!("run: () => Promise<void>;");
     println!("}}");
 }
 
