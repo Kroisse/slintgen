@@ -32,8 +32,13 @@ fn process_node(cursor: &mut TreeCursor, source_bytes: &[u8], seen_types: &mut H
             "struct_definition" => {
                 process_struct(cursor, source_bytes, seen_types);
             }
-            "component_definition" => {
-                process_component(cursor, source_bytes, seen_types);
+            "export" => {
+                if let Some(sibling) = node.next_sibling() {
+                    if sibling.kind() == "component_definition" {
+                        cursor.goto_next_sibling();
+                        process_component(cursor, source_bytes, seen_types);
+                    }
+                }
             }
             _ => {}
         }
