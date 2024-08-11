@@ -1,6 +1,6 @@
 # SlintGen
 
-Generate typescript types from a Slint ui file.
+Generate typescript types from a Slint ui file using tree sitter.
 
 ## Install
 
