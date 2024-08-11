@@ -9,7 +9,7 @@ fn main() {
         .expect("Error loading Slint grammar");
 
     // Read and parse the Slint file
-    let source_code = fs::read_to_string("ui.slint").unwrap();
+    let source_code = fs::read_to_string(std::env::args().nth(1).unwrap()).unwrap();
     let tree = parser.parse(&source_code, None).unwrap();
     let root_node = tree.root_node();
 
@@ -225,9 +225,5 @@ fn map_type(slint_type: String, seen_types: &HashSet<String>) -> String {
 }
 
 fn map_name(slint_name: String) -> String {
-    if slint_name.contains("-") {
-        format!("\"{slint_name}\"")
-    } else {
-        slint_name
-    }
+    slint_name.replace("-", "_")
 }
