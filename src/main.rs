@@ -83,15 +83,33 @@ fn process_component(
         .unwrap_or("UnnamedComponent".to_string());
 
     // Extract properties
-    let properties = extract_component_properties(cursor, source_bytes, seen_types);
+    let (properties, callbacks) = extract_component_properties(cursor, source_bytes, seen_types);
 
     // Generate TypeScript interface
     println!("export interface {} {{", component_name);
     for (name, prop_type) in properties {
         println!("  {}: {};", map_name(name), map_type(prop_type, seen_types));
     }
+    for callback in callbacks {
+        println!(
+            "  {}: ({}) => {};",
+            callback.name,
+            callback
+                .args
+                .iter()
+                .enumerate()
+                .map(|(index, x)| format!(
+                    "{}: {}",
+                    format!("arg{}", index),
+                    map_type(x.to_string(), seen_types)
+                ))
+                .collect::<Vec<String>>()
+                .join(", "),
+            map_type(callback.return_type, seen_types)
+        );
+    }
     // add a run function
-    println!("run: () => Promise<void>;");
+    println!("  run: () => Promise<void>;");
     println!("}}");
 }
 
@@ -99,8 +117,9 @@ fn extract_component_properties(
     cursor: &mut TreeCursor,
     source_bytes: &[u8],
     _seen_types: &mut HashSet<String>,
-) -> Vec<(String, String)> {
+) -> (Vec<(String, String)>, Vec<Callback>) {
     let mut properties = Vec::new();
+    let mut callbacks = Vec::new();
     let node = cursor.node();
 
     if node.kind() == "component_definition" {
@@ -111,6 +130,34 @@ fn extract_component_properties(
                 if prop_cursor.node().kind() == "block" {
                     if prop_cursor.goto_first_child() {
                         loop {
+                            if prop_cursor.node().kind() == "callback" {
+                                let callback_name = prop_cursor
+                                    .node()
+                                    .child_by_field_name("name")
+                                    .unwrap()
+                                    .utf8_text(source_bytes)
+                                    .unwrap()
+                                    .to_string();
+                                let callback_return = prop_cursor
+                                    .node()
+                                    .child_by_field_name("return_type")
+                                    .unwrap()
+                                    .utf8_text(source_bytes)
+                                    .unwrap();
+                                // NOTE: keep this last since it modifies the cursor
+                                // NOTE: Maybe it should not modify the cursor?
+                                let callback_args = prop_cursor
+                                    .node()
+                                    .children_by_field_name("arguments", &mut prop_cursor)
+                                    .map(|x| x.utf8_text(source_bytes).unwrap().to_string())
+                                    .filter(|x| x != ",")
+                                    .collect();
+                                callbacks.push(Callback {
+                                    name: callback_name,
+                                    args: callback_args,
+                                    return_type: callback_return.to_string(),
+                                });
+                            }
                             if prop_cursor.node().kind() == "property" {
                                 let prop_name = prop_cursor
                                     .node()
@@ -157,7 +204,7 @@ fn extract_component_properties(
             }
         }
     }
-    properties
+    (properties, callbacks)
 }
 
 fn extract_struct_fields(
@@ -233,4 +280,10 @@ fn map_type(slint_type: String, seen_types: &HashSet<String>) -> String {
 
 fn map_name(slint_name: String) -> String {
     slint_name.replace("-", "_")
+}
+
+struct Callback {
+    name: String,
+    args: Vec<String>,
+    return_type: String,
 }

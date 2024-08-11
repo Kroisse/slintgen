@@ -44,7 +44,7 @@ export component Window inherits Window {
     title: "BurnCPU";
     in-out property <[CPUData]> cpu-data: [];
     in property <int> active-cpus: 0;
-    callback toggleCPU(int) -> bool;
+    callback toggleCPU(int, bool) -> bool;
 
     background: #f0f0f0;
     width: 400px;
