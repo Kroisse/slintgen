@@ -59,5 +59,5 @@ export interface Window {
 There is also a [deno port](https://github.com/sigmaSd/slintgen/deno) of this tool (It uses tree-sitter wasm bindings).
 
 ```bash
-$ deno run --allow-read --allow-net https://raw.githubusercontent.com/sigmaSd/slintgen/master/deno/main.ts ui.slint > ui.ts
+$ deno run --reload --allow-read --allow-net https://raw.githubusercontent.com/sigmaSd/slintgen/master/deno/main.ts ui.slint > ui.ts
 ```
