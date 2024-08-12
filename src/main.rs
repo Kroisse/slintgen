@@ -150,11 +150,10 @@ fn extract_component_properties(
                                     .node()
                                     .child_by_field_name("return_type")
                                     .map(|x| x.utf8_text(source_bytes).unwrap().to_string());
-                                // NOTE: keep this last since it modifies the cursor
-                                // NOTE: Maybe it should not modify the cursor?
                                 let callback_args = prop_cursor
                                     .node()
-                                    .children_by_field_name("arguments", &mut prop_cursor)
+                                    // clone so we don't modify the cursor
+                                    .children_by_field_name("arguments", &mut prop_cursor.clone())
                                     .map(|x| x.utf8_text(source_bytes).unwrap().to_string())
                                     .filter(|x| x != ",")
                                     .collect();

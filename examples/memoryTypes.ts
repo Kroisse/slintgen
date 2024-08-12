@@ -7,6 +7,13 @@ export interface TileData {
 export interface MainWindow {
   disable_tiles: boolean;
   memory_tiles: TileData[];
+  tile_size: any;
+  tile_spacing: any;
+  row_count: number;
+  column_count: number;
+  width: any;
+  height: any;
+  title: any;
   check_if_pair_solved: () => void;
   run: () => Promise<void>;
 }

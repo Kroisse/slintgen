@@ -7,6 +7,9 @@ export interface Window {
   title: any;
   cpu_data: CPUData[];
   active_cpus: number;
+  background: any;
+  width: any;
+  height: any;
   toggleCPU: (arg0: number, arg1: boolean) => boolean;
   run: () => Promise<void>;
 }
