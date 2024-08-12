@@ -53,3 +53,11 @@ export interface Window {
   run: () => Promise<void>;
 }
 ```
+
+## Deno Port
+
+There is also a [deno port](https://github.com/sigmaSd/slintgen/deno) of this tool.
+
+```bash
+$ deno run --allow-read --allow-net https://raw.githubusercontent.com/sigmaSd/slintgen/master/deno/main.ts ui.slint > ui.ts
+```
