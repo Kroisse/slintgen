@@ -132,10 +132,10 @@ function extractComponentProperties(
                 const callbackReturn =
                   childNode.childForFieldName("return_type")?.text ??
                     null;
-                const callbackArgs =
-                  childNode.childForFieldName("arguments")?.text.split(",").map(
-                    (arg) => arg.trim(),
-                  ) ?? [];
+                const callbackArgs = childNode.childrenForFieldName("arguments")
+                  .map((arg) => arg.text)
+                  .filter((arg) => arg !== ",") ?? [];
+
                 callbacks.push({
                   name: callbackName,
                   args: callbackArgs,
