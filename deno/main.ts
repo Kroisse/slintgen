@@ -7,14 +7,22 @@ interface Callback {
 }
 
 async function main() {
+  const uiFile = Deno.args[0];
+  if (!uiFile) {
+    console.error("No UI file specified");
+    Deno.exit(1);
+  }
+
   await Parser.init();
   const parser = new Parser();
-  const Slint = await Parser.Language.load(
-    new URL(import.meta.resolve("./tree-sitter-slint.wasm")).pathname,
-  );
+  const Slint = await fetch(
+    import.meta.resolve("./tree-sitter-slint.wasm"),
+  )
+    .then((r) => r.bytes())
+    .then((bytes) => Parser.Language.load(bytes));
   parser.setLanguage(Slint);
   // Read and parse the Slint file
-  const sourceCode = Deno.readTextFileSync(Deno.args[0]);
+  const sourceCode = Deno.readTextFileSync(uiFile);
   const tree = parser.parse(sourceCode);
   const rootNode = tree.rootNode;
   const cursor = rootNode.walk();
